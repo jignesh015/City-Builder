@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public PlacementManager placementManager;
     public IInputManager inputManager;
     public UIController uiController;
+    public CameraController cameraController;
 
     [Header("GRID STRUCTURE")]
     [SerializeField] private int cellSize = 3;
@@ -17,27 +18,54 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int gridLength = 100;
     private GridStructure grid;
 
-    [Header("BOOLS")]
-    private bool isBuildModeActive;
+    [Header("STATES")]
+    private PlayerState playerState;
+    public PlayerSelectionState selectionState;
+    public PlayerBuildingSingleStructureState buildingSingleStructureState;
+
+    private void Awake()
+    {
+        grid = new GridStructure(cellSize, gridWidth, gridLength);
+        selectionState = new PlayerSelectionState(this, cameraController);
+        buildingSingleStructureState = new PlayerBuildingSingleStructureState(this, placementManager, grid);
+
+        playerState = selectionState;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        cameraController.SetCameraBounds(0, gridWidth, 0, gridLength);
+
         inputManager = FindObjectsOfType<MonoBehaviour>().OfType<IInputManager>().FirstOrDefault();
-        inputManager.AddListenerOnPointerDownEvent(HandleInput);
-        grid = new GridStructure(cellSize, gridWidth, gridLength);
+        inputManager.AddListenerOnPointerChangeEvent(HandlePointerChange);
+        inputManager.AddListenerOnPointerDownEvent(HandlePointerDown);
+        inputManager.AddListenerOnPointerSecondChangeEvent(HandleCameraPanMovement);
+        inputManager.AddListenerOnPointerSecondUpEvent(StopCameraPanMovement);
 
         uiController.AddListenerOnBuildAreaEvent(EnableBuildMode);
         uiController.AddListenerOnCancelActionEvent(CancelAction);
+
+    }    
+
+    private void StopCameraPanMovement()
+    {
+        playerState.OnInputPointerSecondUp();
     }
 
-    private void HandleInput(Vector3 _position)
+    private void HandleCameraPanMovement(Vector3 _pointerPos)
     {
-        Vector3 gridPos = grid.CalculateGridPosition(_position);
-        if (isBuildModeActive && !grid.IsCellTaken(gridPos))
-        { 
-            placementManager.CreateBuilding(gridPos, grid);
-        }
+        playerState.OnInputPointerSecondChange(_pointerPos);
+    }
+
+    private void HandlePointerChange(Vector3 _pointerPos)
+    {
+        playerState.OnInputPointerChange(_pointerPos);
+    }
+
+    private void HandlePointerDown(Vector3 _position)
+    {
+        playerState.OnInputPointerDown(_position);
     }
 
     // Update is called once per frame
@@ -48,11 +76,17 @@ public class GameManager : MonoBehaviour
 
     private void EnableBuildMode()
     {
-        isBuildModeActive = true;
+        TransitionPlayerState(buildingSingleStructureState);
     }
 
     private void CancelAction()
     {
-        isBuildModeActive = false;
+        playerState.OnCancel();
+    }
+
+    public void TransitionPlayerState(PlayerState _state)
+    {
+        playerState = _state;
+        playerState.EnterState();
     }
 }
