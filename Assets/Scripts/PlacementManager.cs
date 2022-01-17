@@ -19,9 +19,19 @@ public class PlacementManager : MonoBehaviour
         
     }
 
-    public void CreateBuilding(Vector3 _position, GridStructure grid)
+    public void PlaceStructureAt(Vector3 _gridPosition, GridStructure _grid)
     {
-        GameObject structure = Instantiate(buildingPrefab, ground.position+_position, Quaternion.identity);
-        grid.PlaceStructureOnGrid(structure, _position);
+        GameObject structure = Instantiate(buildingPrefab, ground.position+ _gridPosition, Quaternion.identity);
+        _grid.PlaceStructureOnGrid(structure, _gridPosition);
+    }
+
+    public void RemoveStructureAt(Vector3 _gridPosition, GridStructure _grid)
+    {
+        GameObject _structure = _grid.GetStructureOnGrid(_gridPosition);
+        if (_structure != null)
+        {
+            Destroy(_structure);
+            _grid.RemoveStructureFromGrid(_gridPosition);
+        }
     }
 }

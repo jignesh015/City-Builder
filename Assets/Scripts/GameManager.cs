@@ -7,6 +7,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [Header("SCRIPTS")]
+    public BuildingManager buildingManager;
     public PlacementManager placementManager;
     public IInputManager inputManager;
     public UIController uiController;
@@ -16,37 +17,56 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int cellSize = 3;
     [SerializeField] private int gridWidth = 100;
     [SerializeField] private int gridLength = 100;
-    private GridStructure grid;
+    [SerializeField] private LayerMask inputMask;
 
     [Header("STATES")]
     private PlayerState playerState;
     public PlayerSelectionState selectionState;
     public PlayerBuildingSingleStructureState buildingSingleStructureState;
+    public PlayerRemoveBuildingState removeBuildingState;
 
     private void Awake()
     {
-        grid = new GridStructure(cellSize, gridWidth, gridLength);
+        buildingManager = new BuildingManager(cellSize, gridWidth, gridLength, placementManager);
         selectionState = new PlayerSelectionState(this, cameraController);
-        buildingSingleStructureState = new PlayerBuildingSingleStructureState(this, placementManager, grid);
+        buildingSingleStructureState = new PlayerBuildingSingleStructureState(this, buildingManager);
+        removeBuildingState = new PlayerRemoveBuildingState(this, buildingManager);
 
         playerState = selectionState;
+
+#if (UNITY_EDITOR && TEST) || !(UNITY_IOS || UNITY_ANDROID)
+        inputManager = gameObject.AddComponent<InputManager>();
+#endif
     }
 
     // Start is called before the first frame update
     void Start()
     {
         cameraController.SetCameraBounds(0, gridWidth, 0, gridLength);
+        AssignInputListeners();
+        AssignUIControllerListeners();
+    }
 
-        inputManager = FindObjectsOfType<MonoBehaviour>().OfType<IInputManager>().FirstOrDefault();
+    private void AssignUIControllerListeners()
+    {
+        uiController.AddListenerOnBuildAreaEvent(EnableBuildMode);
+        uiController.AddListenerOnCancelActionEvent(CancelAction);
+        uiController.AddListenerOnDemolishEvent(EnableDemolishMode);
+    }
+
+    private void AssignInputListeners()
+    {
+        inputManager.MouseInputMask = inputMask;
         inputManager.AddListenerOnPointerChangeEvent(HandlePointerChange);
         inputManager.AddListenerOnPointerDownEvent(HandlePointerDown);
         inputManager.AddListenerOnPointerSecondChangeEvent(HandleCameraPanMovement);
         inputManager.AddListenerOnPointerSecondUpEvent(StopCameraPanMovement);
+    }
 
-        uiController.AddListenerOnBuildAreaEvent(EnableBuildMode);
-        uiController.AddListenerOnCancelActionEvent(CancelAction);
-
-    }    
+    private void EnableDemolishMode()
+    {
+        TransitionPlayerState(removeBuildingState);
+    }
 
     private void StopCameraPanMovement()
     {
@@ -66,12 +86,6 @@ public class GameManager : MonoBehaviour
     private void HandlePointerDown(Vector3 _position)
     {
         playerState.OnInputPointerDown(_position);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void EnableBuildMode()

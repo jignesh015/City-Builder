@@ -14,6 +14,8 @@ public class InputManager : MonoBehaviour, IInputManager
     private Action<Vector3> OnPointerSecondChangeHandler;
     private Action OnPointerSecondUpHandler;
 
+    public LayerMask MouseInputMask { get => mouseInputMask; set => mouseInputMask=value; }
+
     // Start is called before the first frame update
     void Start()
     {

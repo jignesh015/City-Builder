@@ -4,14 +4,12 @@ using UnityEngine;
 
 public class PlayerBuildingSingleStructureState : PlayerState
 {
-    PlacementManager placementManager;
-    GridStructure grid;
+    BuildingManager buildingManager;
 
     public PlayerBuildingSingleStructureState(GameManager _gameManager,
-        PlacementManager _placementManager, GridStructure _grid) : base(_gameManager)
+       BuildingManager _buildingManager) : base(_gameManager)
     {
-        placementManager = _placementManager;
-        grid = _grid;
+        buildingManager = _buildingManager;
     }
     public override void OnInputPointerChange(Vector3 position)
     {
@@ -20,11 +18,7 @@ public class PlayerBuildingSingleStructureState : PlayerState
 
     public override void OnInputPointerDown(Vector3 position)
     {
-        Vector3 gridPos = grid.CalculateGridPosition(position);
-        if (!grid.IsCellTaken(gridPos))
-        {
-            placementManager.CreateBuilding(gridPos, grid);
-        }
+        buildingManager.CreateBuildingAt(position);
     }
 
     public override void OnInputPointerSecondChange(Vector3 position)

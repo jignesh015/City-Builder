@@ -55,6 +55,25 @@ public class GridStructure
             grid[cellIndex.x,cellIndex.y].BuildStructure(structure);
     }
 
+    public GameObject GetStructureOnGrid(Vector3 gridPosition)
+    {
+        Vector2Int cellIndex = CalculateGridIndex(gridPosition);
+        if (IsCellIndexValid(cellIndex))
+        {
+            return grid[cellIndex.x, cellIndex.y].GetStructure();
+        }
+        throw new IndexOutOfRangeException("No cell found at " + cellIndex);
+    }
+
+    public void RemoveStructureFromGrid(Vector3 gridPosition)
+    {
+        Vector2Int cellIndex = CalculateGridIndex(gridPosition);
+        if (IsCellIndexValid(cellIndex))
+        {
+            grid[cellIndex.x, cellIndex.y].RemoveStructure();
+        }
+    }
+
     private bool IsCellIndexValid(Vector2Int cellIndex)
     {
         if (cellIndex.x >= 0 && cellIndex.x < grid.GetLength(0) &&
