@@ -61,7 +61,6 @@ public class InputManager : MonoBehaviour, IInputManager
         if (Input.GetMouseButton(1))
         {
             var position = Input.mousePosition;
-            Debug.Log(position);
             OnPointerSecondChangeHandler?.Invoke(position);
         }
         if (Input.GetMouseButtonUp(1))

@@ -22,21 +22,30 @@ public class GameManager : MonoBehaviour
     [Header("STATES")]
     private PlayerState playerState;
     public PlayerSelectionState selectionState;
+    public PlayerBuildingZoneState buildingAreaState;
     public PlayerBuildingSingleStructureState buildingSingleStructureState;
+    public PlayerBuildingRoadState buildingRoadState;
     public PlayerRemoveBuildingState removeBuildingState;
 
     private void Awake()
     {
-        buildingManager = new BuildingManager(cellSize, gridWidth, gridLength, placementManager);
-        selectionState = new PlayerSelectionState(this, cameraController);
-        buildingSingleStructureState = new PlayerBuildingSingleStructureState(this, buildingManager);
-        removeBuildingState = new PlayerRemoveBuildingState(this, buildingManager);
-
-        playerState = selectionState;
+        PrepareStates();
 
 #if (UNITY_EDITOR && TEST) || !(UNITY_IOS || UNITY_ANDROID)
         inputManager = gameObject.AddComponent<InputManager>();
 #endif
+    }
+
+    private void PrepareStates()
+    {
+        buildingManager = new BuildingManager(cellSize, gridWidth, gridLength, placementManager, uiController.structureRepository);
+        selectionState = new PlayerSelectionState(this, cameraController);
+        buildingAreaState = new PlayerBuildingZoneState(this, buildingManager);
+        buildingSingleStructureState = new PlayerBuildingSingleStructureState(this, buildingManager);
+        buildingRoadState = new PlayerBuildingRoadState(this, buildingManager);
+        removeBuildingState = new PlayerRemoveBuildingState(this, buildingManager);
+
+        playerState = selectionState;
     }
 
     // Start is called before the first frame update
@@ -49,58 +58,25 @@ public class GameManager : MonoBehaviour
 
     private void AssignUIControllerListeners()
     {
-        uiController.AddListenerOnBuildAreaEvent(EnableBuildMode);
-        uiController.AddListenerOnCancelActionEvent(CancelAction);
-        uiController.AddListenerOnDemolishEvent(EnableDemolishMode);
+        uiController.AddListenerOnBuildAreaEvent((_structureName) => playerState.OnBuildArea(_structureName));
+        uiController.AddListenerOnBuildSingleStructureEvent((_structureName) => playerState.OnBuildSingleStructure(_structureName));
+        uiController.AddListenerOnBuildRoadEvent((_structureName) => playerState.OnBuildRoad(_structureName));
+        uiController.AddListenerOnCancelActionEvent(() => playerState.OnCancel());
+        uiController.AddListenerOnDemolishEvent(() => playerState.OnDemolishStructure());
     }
 
     private void AssignInputListeners()
     {
         inputManager.MouseInputMask = inputMask;
-        inputManager.AddListenerOnPointerChangeEvent(HandlePointerChange);
-        inputManager.AddListenerOnPointerDownEvent(HandlePointerDown);
-        inputManager.AddListenerOnPointerSecondChangeEvent(HandleCameraPanMovement);
-        inputManager.AddListenerOnPointerSecondUpEvent(StopCameraPanMovement);
+        inputManager.AddListenerOnPointerChangeEvent((_position) => playerState.OnInputPointerChange(_position));
+        inputManager.AddListenerOnPointerDownEvent((_position) => playerState.OnInputPointerDown(_position));
+        inputManager.AddListenerOnPointerSecondChangeEvent((_position) => playerState.OnInputPointerSecondChange(_position));
+        inputManager.AddListenerOnPointerSecondUpEvent(() => playerState.OnInputPointerSecondUp());
     }
 
-    private void EnableDemolishMode()
-    {
-        TransitionPlayerState(removeBuildingState);
-    }
-
-    private void StopCameraPanMovement()
-    {
-        playerState.OnInputPointerSecondUp();
-    }
-
-    private void HandleCameraPanMovement(Vector3 _pointerPos)
-    {
-        playerState.OnInputPointerSecondChange(_pointerPos);
-    }
-
-    private void HandlePointerChange(Vector3 _pointerPos)
-    {
-        playerState.OnInputPointerChange(_pointerPos);
-    }
-
-    private void HandlePointerDown(Vector3 _position)
-    {
-        playerState.OnInputPointerDown(_position);
-    }
-
-    private void EnableBuildMode()
-    {
-        TransitionPlayerState(buildingSingleStructureState);
-    }
-
-    private void CancelAction()
-    {
-        playerState.OnCancel();
-    }
-
-    public void TransitionPlayerState(PlayerState _state)
+    public void TransitionPlayerState(PlayerState _state, string _structureName = null)
     {
         playerState = _state;
-        playerState.EnterState();
+        playerState.EnterState(_structureName);
     }
 }

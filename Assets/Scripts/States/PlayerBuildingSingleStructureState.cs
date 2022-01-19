@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerBuildingSingleStructureState : PlayerState
 {
     BuildingManager buildingManager;
+    string structureName;
 
     public PlayerBuildingSingleStructureState(GameManager _gameManager,
        BuildingManager _buildingManager) : base(_gameManager)
@@ -18,7 +19,8 @@ public class PlayerBuildingSingleStructureState : PlayerState
 
     public override void OnInputPointerDown(Vector3 position)
     {
-        buildingManager.CreateBuildingAt(position);
+        Debug.Log("Single");
+        buildingManager.CreateBuildingAt(position, structureName, StructureType.SingleStructure);
     }
 
     public override void OnInputPointerSecondChange(Vector3 position)
@@ -39,5 +41,10 @@ public class PlayerBuildingSingleStructureState : PlayerState
     public override void OnCancel()
     {
         gameManager.TransitionPlayerState(gameManager.selectionState);
+    }
+
+    public override void EnterState(string _structureName)
+    {
+        structureName = _structureName; 
     }
 }

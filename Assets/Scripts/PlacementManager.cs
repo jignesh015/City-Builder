@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlacementManager : MonoBehaviour
 {
-    [SerializeField] private GameObject buildingPrefab;
     [SerializeField] private Transform ground;
 
     // Start is called before the first frame update
@@ -19,9 +18,9 @@ public class PlacementManager : MonoBehaviour
         
     }
 
-    public void PlaceStructureAt(Vector3 _gridPosition, GridStructure _grid)
+    public void PlaceStructureAt(Vector3 _gridPosition, GridStructure _grid, GameObject _buildingPrefab)
     {
-        GameObject structure = Instantiate(buildingPrefab, ground.position+ _gridPosition, Quaternion.identity);
+        GameObject structure = Instantiate(_buildingPrefab, ground.position+ _gridPosition, Quaternion.identity);
         _grid.PlaceStructureOnGrid(structure, _gridPosition);
     }
 
