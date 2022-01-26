@@ -19,18 +19,7 @@ public class PlayerBuildingSingleStructureState : PlayerState
 
     public override void OnInputPointerDown(Vector3 position)
     {
-        Debug.Log("Single");
-        buildingManager.CreateBuildingAt(position, structureName, StructureType.SingleStructure);
-    }
-
-    public override void OnInputPointerSecondChange(Vector3 position)
-    {
-        return;
-    }
-
-    public override void OnInputPointerSecondUp()
-    {
-        return;
+        buildingManager.TogglePlacementModeAt(position, structureName, StructureType.SingleStructure);
     }
 
     public override void OnInputPointerUp()
@@ -38,8 +27,33 @@ public class PlayerBuildingSingleStructureState : PlayerState
         return;
     }
 
+    public override void OnConfirmAction()
+    {
+        buildingManager.ConfirmPlacement();
+        base.OnConfirmAction();
+    }
+
+    public override void OnBuildArea(string structureName)
+    {
+        buildingManager.CancelPlacement();
+        base.OnBuildArea(structureName);
+    }
+
+    public override void OnBuildRoad(string structureName)
+    {
+        buildingManager.CancelPlacement();
+        base.OnBuildRoad(structureName);
+    }
+
+    public override void OnBuildSingleStructure(string structureName)
+    {
+        buildingManager.CancelPlacement();
+        base.OnBuildSingleStructure(structureName);
+    }
+
     public override void OnCancel()
     {
+        buildingManager.CancelPlacement();
         gameManager.TransitionPlayerState(gameManager.selectionState);
     }
 

@@ -5,10 +5,12 @@ using UnityEngine;
 public abstract class PlayerState
 {
     protected GameManager gameManager;
+    protected CameraController cameraController;
 
     public PlayerState(GameManager _gameManager)
     {
         gameManager = _gameManager;
+        cameraController = gameManager.cameraController;
     }
 
     public virtual void OnInputPointerChange(Vector3 position)
@@ -23,15 +25,13 @@ public abstract class PlayerState
     {
 
     }
-    public virtual void OnInputPointerSecondChange(Vector3 position)
-    {
-
-    }
-    public virtual void OnInputPointerSecondUp()
-    {
-
-    }
+ 
     public abstract void OnCancel();
+
+    public virtual void OnConfirmAction()
+    {
+        gameManager.TransitionPlayerState(gameManager.selectionState);
+    }
 
     public virtual void EnterState(string variable)
     { 
@@ -56,6 +56,16 @@ public abstract class PlayerState
     public virtual void OnDemolishStructure()
     {
         gameManager.TransitionPlayerState(gameManager.removeBuildingState);
+    }
+
+    public virtual void OnInputPointerSecondChange(Vector3 position)
+    {
+        cameraController.MoveCamera(position);
+    }
+
+    public virtual void OnInputPointerSecondUp()
+    {
+        cameraController.StopCameraMovememt();
     }
 
 }

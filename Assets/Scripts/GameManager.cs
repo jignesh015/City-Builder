@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
     public PlayerBuildingZoneState buildingAreaState;
     public PlayerBuildingSingleStructureState buildingSingleStructureState;
     public PlayerBuildingRoadState buildingRoadState;
-    public PlayerRemoveBuildingState removeBuildingState;
+    public PlayerDemolishStructureState removeBuildingState;
 
     private void Awake()
     {
@@ -39,11 +39,11 @@ public class GameManager : MonoBehaviour
     private void PrepareStates()
     {
         buildingManager = new BuildingManager(cellSize, gridWidth, gridLength, placementManager, uiController.structureRepository);
-        selectionState = new PlayerSelectionState(this, cameraController);
+        selectionState = new PlayerSelectionState(this);
         buildingAreaState = new PlayerBuildingZoneState(this, buildingManager);
         buildingSingleStructureState = new PlayerBuildingSingleStructureState(this, buildingManager);
         buildingRoadState = new PlayerBuildingRoadState(this, buildingManager);
-        removeBuildingState = new PlayerRemoveBuildingState(this, buildingManager);
+        removeBuildingState = new PlayerDemolishStructureState(this, buildingManager);
 
         playerState = selectionState;
     }
@@ -61,6 +61,7 @@ public class GameManager : MonoBehaviour
         uiController.AddListenerOnBuildAreaEvent((_structureName) => playerState.OnBuildArea(_structureName));
         uiController.AddListenerOnBuildSingleStructureEvent((_structureName) => playerState.OnBuildSingleStructure(_structureName));
         uiController.AddListenerOnBuildRoadEvent((_structureName) => playerState.OnBuildRoad(_structureName));
+        uiController.AddListenerOnConfirmActionEvent(() => playerState.OnConfirmAction());
         uiController.AddListenerOnCancelActionEvent(() => playerState.OnCancel());
         uiController.AddListenerOnDemolishEvent(() => playerState.OnDemolishStructure());
     }

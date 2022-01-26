@@ -15,12 +15,36 @@ public class PlayerBuildingZoneState : PlayerState
 
     public override void OnInputPointerDown(Vector3 position)
     {
-        Debug.Log("Area");
-        buildingManager.CreateBuildingAt(position, structureName, StructureType.Zone);
+        buildingManager.TogglePlacementModeAt(position, structureName, StructureType.Zone);
+    }
+
+    public override void OnConfirmAction()
+    {
+        buildingManager.ConfirmPlacement();
+        base.OnConfirmAction();
+    }
+
+    public override void OnBuildArea(string structureName)
+    {
+        buildingManager.CancelPlacement();
+        base.OnBuildArea(structureName);
+    }
+
+    public override void OnBuildRoad(string structureName)
+    {
+        buildingManager.CancelPlacement();
+        base.OnBuildRoad(structureName);
+    }
+
+    public override void OnBuildSingleStructure(string structureName)
+    {
+        buildingManager.CancelPlacement();
+        base.OnBuildSingleStructure(structureName);
     }
 
     public override void OnCancel()
     {
+        buildingManager.CancelPlacement();
         gameManager.TransitionPlayerState(gameManager.selectionState);
     }
 

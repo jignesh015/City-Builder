@@ -9,6 +9,7 @@ public class UIController : MonoBehaviour
 {
     [Header("BUTTONS")]
     [SerializeField] private Button buildResidentialAreaBtn;
+    [SerializeField] private Button confirmActionBtn;
     [SerializeField] private Button cancelActionBtn;
     [SerializeField] private Button openBuildMenuBtn;
     [SerializeField] private Button closeBuildMenuBtn;
@@ -28,6 +29,7 @@ public class UIController : MonoBehaviour
     private Action<string> OnBuildAreaHandler;
     private Action<string> OnBuildSingleStructureHandler;
     private Action<string> OnBuildRoadHandler;
+    private Action OnConfirmActionHandler;
     private Action OnCancelActionHandler;
     private Action OnDemolishHandler;
 
@@ -40,6 +42,7 @@ public class UIController : MonoBehaviour
         cancelPanel.SetActive(false);
         buildingMenuPanel.SetActive(false);
         //buildResidentialAreaBtn.onClick.AddListener(OnBuildAreaCallback);
+        confirmActionBtn.onClick.AddListener(OnConfirmActionCallback);
         cancelActionBtn.onClick.AddListener(OnCancelActionCallback);
         openBuildMenuBtn.onClick.AddListener(OnOpenBuildMenu);
         closeBuildMenuBtn.onClick.AddListener(OnCloseBuildMenu);
@@ -124,6 +127,12 @@ public class UIController : MonoBehaviour
         OnCancelActionHandler?.Invoke();
     }
 
+    private void OnConfirmActionCallback()
+    {
+        cancelPanel.SetActive(false);
+        OnConfirmActionHandler?.Invoke();
+    }
+
     #region PUBLIC METHODS
     public void AddListenerOnBuildAreaEvent(Action<string> listener)
     {
@@ -163,6 +172,16 @@ public class UIController : MonoBehaviour
     public void RemoveListenerOnCancelActionEvent(Action listener)
     {
         OnCancelActionHandler -= listener;
+    }
+
+    public void AddListenerOnConfirmActionEvent(Action listener)
+    {
+        OnConfirmActionHandler += listener;
+    }
+
+    public void RemoveListenerOnConfirmActionEvent(Action listener)
+    {
+        OnConfirmActionHandler -= listener;
     }
 
     public void AddListenerOnDemolishEvent(Action listener)

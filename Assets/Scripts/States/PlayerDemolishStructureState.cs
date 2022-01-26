@@ -2,54 +2,57 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerBuildingRoadState : PlayerState
+public class PlayerDemolishStructureState : PlayerState
 {
     BuildingManager buildingManager;
-    string structureName;
 
-    public PlayerBuildingRoadState(GameManager _gameManager,
-       BuildingManager _buildingManager) : base(_gameManager)
+    public PlayerDemolishStructureState(GameManager _gameManager, BuildingManager _buildingManager) : base(_gameManager)
     {
         buildingManager = _buildingManager;
     }
 
-    public override void OnInputPointerDown(Vector3 position)
-    {
-        buildingManager.TogglePlacementModeAt(position, structureName, StructureType.Road);
-    }
-
     public override void OnConfirmAction()
     {
-        buildingManager.ConfirmPlacement();
+        buildingManager.ConfirmDemolition();
         base.OnConfirmAction();
     }
 
     public override void OnBuildArea(string structureName)
     {
-        buildingManager.CancelPlacement();
+        buildingManager.CancelDemolition();
         base.OnBuildArea(structureName);
     }
 
     public override void OnBuildRoad(string structureName)
     {
-        buildingManager.CancelPlacement();
+        buildingManager.CancelDemolition();
         base.OnBuildRoad(structureName);
     }
 
     public override void OnBuildSingleStructure(string structureName)
     {
-        buildingManager.CancelPlacement();
+        buildingManager.CancelDemolition();
         base.OnBuildSingleStructure(structureName);
     }
 
     public override void OnCancel()
     {
-        buildingManager.CancelPlacement();
+        buildingManager.CancelDemolition();
         gameManager.TransitionPlayerState(gameManager.selectionState);
     }
 
-    public override void EnterState(string _structureName)
+    public override void OnInputPointerChange(Vector3 position)
     {
-        structureName = _structureName;
+        return;
+    }
+
+    public override void OnInputPointerDown(Vector3 position)
+    {
+        buildingManager.ToggleDemolitionModeAt(position);
+    }
+
+    public override void OnInputPointerUp()
+    {
+        return;
     }
 }
